@@ -33,11 +33,9 @@ import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.content.TabPresenter;
 import org.eclipse.che.ide.extension.machine.client.processes.AddTerminalClickHandler;
+
 import org.eclipse.che.ide.websocket.WebSocket;
-import org.eclipse.che.ide.websocket.events.ConnectionErrorHandler;
-import org.eclipse.che.ide.websocket.events.ConnectionOpenedHandler;
-import org.eclipse.che.ide.websocket.events.MessageReceivedEvent;
-import org.eclipse.che.ide.websocket.events.MessageReceivedHandler;
+import org.eclipse.che.ide.websocket.events.*;
 
 import javax.validation.constraints.NotNull;
 
@@ -162,6 +160,20 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
 
         socket = WebSocket.create(wsUrl);
 
+        socket.setOnMessageHandler(new MessageReceivedHandler() {
+            @Override
+            public void onMessageReceived(MessageReceivedEvent event) {
+                terminal.write(event.getMessage());
+            }
+        });
+
+        socket.setOnCloseHandler(new ConnectionClosedHandler() {
+            @Override
+            public void onClose(WebSocketClosedEvent event) {
+                terminalStateListener.onExit();
+            }
+        });
+
         socket.setOnOpenHandler(new ConnectionOpenedHandler() {
             @Override
             public void onOpen() {
@@ -182,18 +194,6 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
                         jso.addField("type", "data");
                         jso.addField("data", arg);
                         socket.send(jso.serialize());
-                    }
-                });
-                socket.setOnMessageHandler(new MessageReceivedHandler() {
-                    @Override
-                    public void onMessageReceived(MessageReceivedEvent event) {
-                        String message = event.getMessage();
-
-                        terminal.write(message);
-
-                        if (message.contains(EXIT_COMMAND) && terminalStateListener != null) {
-                            terminalStateListener.onExit();
-                        }
                     }
                 });
             }
