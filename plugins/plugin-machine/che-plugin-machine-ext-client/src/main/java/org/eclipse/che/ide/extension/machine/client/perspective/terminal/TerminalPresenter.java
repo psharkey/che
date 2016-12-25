@@ -35,7 +35,12 @@ import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.cont
 import org.eclipse.che.ide.extension.machine.client.processes.AddTerminalClickHandler;
 
 import org.eclipse.che.ide.websocket.WebSocket;
-import org.eclipse.che.ide.websocket.events.*;
+import org.eclipse.che.ide.websocket.events.ConnectionClosedHandler;
+import org.eclipse.che.ide.websocket.events.ConnectionErrorHandler;
+import org.eclipse.che.ide.websocket.events.ConnectionOpenedHandler;
+import org.eclipse.che.ide.websocket.events.MessageReceivedEvent;
+import org.eclipse.che.ide.websocket.events.MessageReceivedHandler;
+import org.eclipse.che.ide.websocket.events.WebSocketClosedEvent;
 
 import javax.validation.constraints.NotNull;
 

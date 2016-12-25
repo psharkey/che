@@ -58,8 +58,8 @@ type ReadWriteRoutingFinalizer struct {
 
 var (
 	upgrader = websocket.Upgrader{
-		ReadBufferSize:  1,
-		WriteBufferSize: 1,
+		ReadBufferSize:  2,
+		WriteBufferSize: 2,
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},
@@ -294,7 +294,15 @@ func closeConn(conn *websocket.Conn, finalizer *ReadWriteRoutingFinalizer) {
 
 	finalizer.Lock()
 	if !finalizer.writeDone {
-		conn.Close()
+		err := conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+		if err != nil {
+			log.Printf("Failed to send websocket close message: '%s'", err.Error())
+		}
+		//wait receiving close message
+		if err := conn.Close(); err != nil {
+			fmt.Printf("Close connection problem: '%s'", err.Error())
+		}
+
 		finalizer.writeDone = true
 		fmt.Println("Terminal writer closed.")
 	}
