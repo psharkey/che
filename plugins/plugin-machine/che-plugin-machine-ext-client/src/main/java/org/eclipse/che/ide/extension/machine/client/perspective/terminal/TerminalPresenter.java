@@ -220,7 +220,7 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
     public void stopTerminal() {
         if (connected) {
             Jso jso = Jso.create();
-            jso.addField("type", "kill");
+            jso.addField("type", "close");
             socket.send(jso.serialize());
         }
     }

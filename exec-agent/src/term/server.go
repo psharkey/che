@@ -46,11 +46,19 @@ type wsPty struct {
 	PtyFile *os.File  // a pty is simply an os.File
 }
 
-func (wp *wsPty) Stop(finalizer *ReadWriteRoutingFinalizer) {
+//Stop terminal process and its child processes. In modern Unix systems terminal stops with help
+// SIGHUP signal and we used such way too. SIGHUP signal used to send a signal to a process
+// (or process group), it's signal meaning that pseudo or virtual terminal has been closed.
+// Example: command is executed inside a terminal window and the terminal window is closed while
+// the command process is still running.
+// If the process receiving SIGHUP is a Unix shell, then as part of job control it will often intercept
+// the signal and ensure that all stopped processes are continued before sending the signal to child
+// processes (more precisely, process groups, represented internally be the shell as a "job"), which
+// by default terminates them.
+func (wp *wsPty) Close(finalizer *ReadWriteRoutingFinalizer) {
 	closeFile(wp.PtyFile, finalizer)
 	pid := wp.Cmd.Process.Pid;
 
-	//See more https://en.wikipedia.org/wiki/Unix_signal#SIGHUP and more https://en.wikipedia.org/wiki/SIGHUP
 	if pgid, err := syscall.Getpgid(pid); err == nil {
 		if err := syscall.Kill(-pgid, syscall.SIGHUP); err != nil {
 			fmt.Errorf("Failed to SIGHUP terminal process by pgid: '%s'. Cause: '%s'", pgid, err);
@@ -159,8 +167,8 @@ func sendConnectionInputToPty(conn *websocket.Conn, reader io.ReadCloser, wp *ws
 				log.Printf("Invalid message %s\n", err)
 				continue
 			}
-			if msg.Type == "kill" {
-				wp.Stop(finalizer);
+			if msg.Type == "close" {
+				wp.Close(finalizer);
 				return
 			}
 			if errMsg := handleMessage(msg, f); errMsg != nil {
@@ -301,7 +309,7 @@ func closeReader(reader io.ReadCloser, file *os.File, finalizer *ReadWriteRoutin
 	if !finalizer.readDone {
 		closeReaderErr := reader.Close()
 		if closeReaderErr != nil {
-			log.Printf("Failed to close pty file reader '%s'" + closeReaderErr.Error())
+			log.Printf("Failed to close pty file reader: '%s'" + closeReaderErr.Error())
 		}
 		//hack to prevent suspend reader on the operation read when file has been already closed.
 		file.Write([]byte{})
@@ -327,7 +335,9 @@ func closeFile(file *os.File, finalizer *ReadWriteRoutingFinalizer) {
 
 	finalizer.Lock()
 	if !finalizer.fileClosed {
-		file.Close()
+		if err := file.Close(); err != nil {
+			log.Printf("Failed to close pty file: '%s'", err.Error())
+		}
 		finalizer.fileClosed = true
 		fmt.Println("Pty file closed.")
 	}
