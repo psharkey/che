@@ -215,7 +215,7 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
     }
 
     /**
-     * Sends 'kill' command on server side to stop terminal.
+     * Sends 'close' message on server side to stop terminal.
      */
     public void stopTerminal() {
         if (connected) {
