@@ -313,7 +313,6 @@ func closeConn(conn *websocket.Conn, finalizer *ReadWriteRoutingFinalizer) {
 		if err != nil {
 			log.Printf("Failed to send websocket close message: '%s'", err.Error())
 		}
-		//wait receiving close message
 		if err := conn.Close(); err != nil {
 			fmt.Printf("Close connection problem: '%s'", err.Error())
 		}
