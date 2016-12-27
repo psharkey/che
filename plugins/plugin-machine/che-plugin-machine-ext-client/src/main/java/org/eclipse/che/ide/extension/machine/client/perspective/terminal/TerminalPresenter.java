@@ -47,6 +47,7 @@ import javax.validation.constraints.NotNull;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.websocket.events.WebSocketClosedEvent.CLOSE_NORMAL;
 
 /**
  * The class defines methods which contains business logic to control machine's terminal.
@@ -175,7 +176,9 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
         socket.setOnCloseHandler(new ConnectionClosedHandler() {
             @Override
             public void onClose(WebSocketClosedEvent event) {
-                terminalStateListener.onExit();
+                if (CLOSE_NORMAL == event.getCode()) {
+                    terminalStateListener.onExit();
+                }
             }
         });
 
