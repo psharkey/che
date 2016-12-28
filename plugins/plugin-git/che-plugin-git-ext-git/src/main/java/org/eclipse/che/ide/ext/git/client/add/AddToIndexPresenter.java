@@ -20,7 +20,7 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
@@ -28,7 +28,9 @@ import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
@@ -41,7 +43,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  */
 @Singleton
 public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
-    protected static final  String ADD_TO_INDEX_COMMAND_NAME = "Git add to index";
+    private static final String ADD_TO_INDEX_COMMAND_NAME = "Git add to index";
 
     private final AddToIndexView          view;
     private final GitServiceClient        service;
@@ -50,7 +52,6 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
     private final NotificationManager     notificationManager;
     private final GitOutputConsoleFactory gitOutputConsoleFactory;
     private final ProcessesPanelPresenter consolesPanelPresenter;
-    private       Project                 project;
 
     @Inject
     public AddToIndexPresenter(AddToIndexView view,
@@ -70,38 +71,57 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
         this.consolesPanelPresenter = processesPanelPresenter;
     }
 
-    public void showDialog(Project project) {
-        this.project = project;
-
-        checkArgument(project != null, "Null project occurred");
-
+    public void showDialog() {
+        final Resource[] resources = appContext.getResources();
+        checkState(resources != null && resources.length > 0);
         final GitOutputConsole console = gitOutputConsoleFactory.create(ADD_TO_INDEX_COMMAND_NAME);
 
-        service.getStatus(appContext.getDevMachine(), project.getLocation()).then(new Operation<Status>() {
-            @Override
-            public void apply(Status status) throws OperationException {
-                if (!status.isClean()) {
-                    final Resource[] resources = appContext.getResources();
+        service.getStatus(appContext.getDevMachine(), appContext.getRootProject().getLocation())
+               .then(new Operation<Status>() {
+                   @Override
+                   public void apply(Status status) throws OperationException {
+                       List<String> untracked = new ArrayList<String>();
+                       untracked.addAll(status.getModified());
+                       untracked.addAll(status.getUntracked());
 
-                    checkState(resources != null && resources.length > 0);
+                       for (String untrackedItem : untracked) {
+                           for (Resource selectedItem : appContext.getResources()) {
+                               String path = selectedItem.getLocation()
+                                                         .removeFirstSegments(appContext.getRootProject().getLocation().segmentCount())
+                                                         .toString();
+                               if (untrackedItem.startsWith(path)) {
 
-                    view.setMessage(constant.addToIndexAllChanges(), null);
-                    view.setUpdated(false);
-                    view.showDialog();
-                } else {
-                    console.print(constant.nothingAddToIndex());
-                    consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                    notificationManager.notify(constant.nothingAddToIndex());
-                }
+                                   return;
+                               }
+                           }
+                       }
+                       console.print(constant.nothingAddToIndex());
+                       consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                       notificationManager.notify(constant.nothingAddToIndex());
+                   }
+               })
+               .catchError(new Operation<PromiseError>() {
+                   @Override
+                   public void apply(PromiseError error) throws OperationException {
+                       console.printError(constant.statusFailed());
+                       consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                       notificationManager.notify(constant.statusFailed(), FAIL, FLOAT_MODE);
+                   }
+               });
+    }
+
+    private void updateViewAndShowDialog(int length, String name) {
+        if (length == 1) {
+            if (appContext.getResource() instanceof Container) {
+                view.setMessage(constant.addToIndexFolder(name), null);
+            } else {
+                view.setMessage(constant.addToIndexFile(name), null);
             }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                console.printError(constant.statusFailed());
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                notificationManager.notify(constant.statusFailed(), FAIL, FLOAT_MODE);
-            }
-        });
+        } else if (length > 1) {
+            view.setMessage(constant.addToIndexMultiple(), null);
+        }
+        view.setUpdated(false);
+        view.showDialog();
     }
 
 
@@ -116,31 +136,33 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
         final Path[] paths = new Path[resources.length];
 
         for (int i = 0; i < resources.length; i++) {
-            checkState(project.getLocation().isPrefixOf(resources[i].getLocation()));
+            checkState(appContext.getRootProject().getLocation().isPrefixOf(resources[i].getLocation()));
 
-            final Path tmpPath = resources[i].getLocation().removeFirstSegments(project.getLocation().segmentCount());
+            final Path tmpPath = resources[i].getLocation().removeFirstSegments(appContext.getRootProject().getLocation().segmentCount());
 
             paths[i] = tmpPath.segmentCount() == 0 ? Path.EMPTY : tmpPath;
         }
 
-        service.add(appContext.getDevMachine(), project.getLocation(), view.isUpdated(), paths).then(new Operation<Void>() {
-            @Override
-            public void apply(Void arg) throws OperationException {
-                console.print(constant.addSuccess());
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                notificationManager.notify(constant.addSuccess());
-                view.close();
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                String errorMessage = constant.addFailed();
-                console.printError(errorMessage);
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                notificationManager.notify(constant.addFailed(), FAIL, FLOAT_MODE);
-                view.close();
-            }
-        });
+        service.add(appContext.getDevMachine(), appContext.getRootProject().getLocation(), view.isUpdated(), paths)
+               .then(new Operation<Void>() {
+                   @Override
+                   public void apply(Void arg) throws OperationException {
+                       console.print(constant.addSuccess());
+                       consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                       notificationManager.notify(constant.addSuccess());
+                       view.close();
+                   }
+               })
+               .catchError(new Operation<PromiseError>() {
+                   @Override
+                   public void apply(PromiseError arg) throws OperationException {
+                       String errorMessage = constant.addFailed();
+                       console.printError(errorMessage);
+                       consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                       notificationManager.notify(constant.addFailed(), FAIL, FLOAT_MODE);
+                       view.close();
+                   }
+               });
     }
 
     /** {@inheritDoc} */

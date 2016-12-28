@@ -298,10 +298,10 @@ public interface GitLocalizationConstant extends Messages {
     String addToIndexMultiple();
 
     @Key("view.add_to_index.folder")
-    SafeHtml addToIndexFolder(String folder);
+    String addToIndexFolder(String folder);
 
     @Key("view.add_to_index.file")
-    SafeHtml addToIndexFile(String file);
+    String addToIndexFile(String file);
 
     @Key("view.add_to_index.update_field_title")
     String addToIndexUpdateFieldTitle();

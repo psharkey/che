@@ -66,7 +66,7 @@ public class AddToIndexPresenterTest extends BaseTest {
         when(appContext.getResources()).thenReturn(new Resource[]{mock(Resource.class)});
         when(constant.addToIndexAllChanges()).thenReturn(MESSAGE);
 
-        presenter.showDialog(project);
+        presenter.showDialog();
 
         verify(statusPromise).then(statusPromiseCaptor.capture());
         statusPromiseCaptor.getValue().apply(statusResponse);
