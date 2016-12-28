@@ -95,6 +95,9 @@ public interface GitLocalizationConstant extends Messages {
     @Key("messages.nothingAddToIndex")
     String nothingAddToIndex();
 
+    @Key("messages.nothingAddToIndexMultiSelect")
+    String nothingAddToIndexMultiSelect();
+
     @Key("messages.add_failed")
     String addFailed();
 
