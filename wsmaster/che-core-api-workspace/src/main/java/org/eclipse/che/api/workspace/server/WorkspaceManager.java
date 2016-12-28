@@ -627,18 +627,19 @@ public class WorkspaceManager {
                          workspace.getConfig().getName(),
                          workspace.getId(),
                          sessionUserNameOr("undefined"));
-            } catch (ExecutionException execEx) {
-                LOG.warn("Workspace start failed: {}", execEx.getMessage());
             } catch (Exception ex) {
+                if (workspace.isTemporary()) {
+                    removeWorkspaceQuietly(workspace);
+                }
                 for (Throwable cause : getCausalChain(ex)) {
                     if (cause instanceof SourceNotFoundException) {
                         return;
                     }
                 }
-                LOG.error(ex.getLocalizedMessage(), ex);
-            } finally {
-                if (workspace.isTemporary()) {
-                    removeWorkspaceQuietly(workspace);
+                if (ex instanceof ExecutionException) {
+                    LOG.warn("Workspace start failed: {}", ex.getLocalizedMessage());
+                } else {
+                    LOG.error(ex.getLocalizedMessage(), ex);
                 }
             }
         });
