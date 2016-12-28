@@ -46,6 +46,7 @@ import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
@@ -626,16 +627,19 @@ public class WorkspaceManager {
                          workspace.getConfig().getName(),
                          workspace.getId(),
                          sessionUserNameOr("undefined"));
+            } catch (ExecutionException execEx) {
+                LOG.warn("Workspace start failed: {}", execEx.getMessage());
             } catch (Exception ex) {
-                if (workspace.isTemporary()) {
-                    removeWorkspaceQuietly(workspace);
-                }
                 for (Throwable cause : getCausalChain(ex)) {
                     if (cause instanceof SourceNotFoundException) {
                         return;
                     }
                 }
                 LOG.error(ex.getLocalizedMessage(), ex);
+            } finally {
+                if (workspace.isTemporary()) {
+                    removeWorkspaceQuietly(workspace);
+                }
             }
         });
     }
