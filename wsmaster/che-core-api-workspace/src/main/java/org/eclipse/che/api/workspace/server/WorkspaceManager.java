@@ -636,7 +636,7 @@ public class WorkspaceManager {
                         return;
                     }
                 }
-                if (ex instanceof ExecutionException) {
+                if (ex instanceof ExecutionException && !(ex.getCause() instanceof ServerException)) {
                     LOG.warn("Workspace start failed: {}", ex.getLocalizedMessage());
                 } else {
                     LOG.error(ex.getLocalizedMessage(), ex);
