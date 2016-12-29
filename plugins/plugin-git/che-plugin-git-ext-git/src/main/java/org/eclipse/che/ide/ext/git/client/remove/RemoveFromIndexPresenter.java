@@ -18,6 +18,7 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
@@ -72,8 +73,15 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
 
     public void showDialog(Project project) {
         this.project = project;
-
-        view.setMessage(constant.removeFromIndexAll());
+        if (appContext.getResources().length == 1) {
+            if (appContext.getResource() instanceof Container) {
+                view.setMessage(constant.removeFromIndexFolder(appContext.getResource().getName()));
+            } else {
+                view.setMessage(constant.removeFromIndexFile(appContext.getResource().getName()));
+            }
+        } else {
+            view.setMessage(constant.removeFromIndexAll());
+        }
         view.setRemoved(false);
         view.showDialog();
     }

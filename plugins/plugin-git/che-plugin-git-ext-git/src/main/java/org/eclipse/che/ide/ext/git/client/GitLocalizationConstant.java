@@ -351,13 +351,13 @@ public interface GitLocalizationConstant extends Messages {
     String commitTitle();
 
     @Key("view.commit.all_field_title")
-    String commitAllFieldTitle();
+    String commitAddAllFieldTitle();
 
     @Key("view.commit.selection_field_title")
     String commitSelectionFieldTitle();
 
     @Key("view.commit.onlyselection_field_title")
-    String commitOnlySelectionFieldTitle();
+    String commitAllFieldTitle();
 
     @Key("view.commit.amend_field_title")
     String commitAmendFieldTitle();
@@ -416,10 +416,10 @@ public interface GitLocalizationConstant extends Messages {
     String removeFromIndexOnly();
 
     @Key("view.remove_from_index.folder")
-    SafeHtml removeFromIndexFolder(String folder);
+    String removeFromIndexFolder(String folder);
 
     @Key("view.remove_from_index.file")
-    SafeHtml removeFromIndexFile(String file);
+    String removeFromIndexFile(String file);
 
     @Key("view.remove_from_index.title")
     String removeFromIndexTitle();

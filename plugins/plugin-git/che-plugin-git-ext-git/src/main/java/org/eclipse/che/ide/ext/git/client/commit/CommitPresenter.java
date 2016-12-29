@@ -63,7 +63,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     private final GitOutputConsoleFactory gitOutputConsoleFactory;
     private final ProcessesPanelPresenter consolesPanelPresenter;
 
-    private       Project                 project;
+    private Project project;
 
     @Inject
     public CommitPresenter(CommitView view,
@@ -93,7 +93,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
         view.setAmend(false);
         view.setAllFilesInclude(false);
         view.setIncludeSelection(false);
-        view.setOnlySelection(false);
+        view.setCommitAllSelection(false);
         view.setEnableCommitButton(!view.getMessage().isEmpty());
         view.showDialog();
         view.focusInMessageField();
@@ -106,14 +106,14 @@ public class CommitPresenter implements CommitView.ActionDelegate {
         final boolean all = view.isAllFilesInclued();
         final boolean amend = view.isAmend();
         final boolean selectionFlag = this.view.isIncludeSelection();
-        final boolean onlySelectionFlag = this.view.isOnlySelection();
+        final boolean commitAllFlag = this.view.isCommitAllSelection();
 
         if (selectionFlag) {
             addAndCommitSelection(message, amend);
-        } else if (onlySelectionFlag) {
-            commitSelection(message, amend);
-        } else {
+        } else if (commitAllFlag) {
             doCommit(message, all, amend);
+        } else {
+            commitSelection(message, amend);
         }
     }
 
@@ -127,7 +127,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
                    .then(new Operation<Void>() {
                        @Override
                        public void apply(Void ignored) throws OperationException {
-                           doCommit(message, false, amend);
+                           commitSelection(message, amend);
                        }
                    });
         }

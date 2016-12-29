@@ -72,7 +72,7 @@ public class AddToIndexPresenterTest extends BaseTest {
         statusPromiseCaptor.getValue().apply(statusResponse);
 
         verify(constant).addToIndexAllChanges();
-        verify(view).setMessage(eq(MESSAGE), Matchers.<List<String>>eq(null));
+        verify(view).setMessage(eq(MESSAGE));
         verify(view).setUpdated(anyBoolean());
         verify(view).showDialog();
     }

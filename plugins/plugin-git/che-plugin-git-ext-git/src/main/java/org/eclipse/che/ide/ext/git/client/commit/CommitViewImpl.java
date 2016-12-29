@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ext.git.client.commit;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ui.window.Window;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -57,7 +58,7 @@ public class CommitViewImpl extends Window implements CommitView {
      * The 'commit only selection' field.
      */
     @UiField
-    CheckBox onlySelection;
+    CheckBox commitAllSelection;
 
     /**
      * The amend commit flag.
@@ -175,13 +176,13 @@ public class CommitViewImpl extends Window implements CommitView {
     }
 
     @Override
-    public boolean isOnlySelection() {
-        return this.onlySelection.getValue();
+    public boolean isCommitAllSelection() {
+        return this.commitAllSelection.getValue();
     }
 
     @Override
-    public void setOnlySelection(final boolean onlySelection) {
-        this.onlySelection.setValue(onlySelection);
+    public void setCommitAllSelection(final boolean onlySelection) {
+        this.commitAllSelection.setValue(onlySelection);
     }
 
     /** {@inheritDoc} */
@@ -228,7 +229,6 @@ public class CommitViewImpl extends Window implements CommitView {
     public void onAddAllValueChange(final ValueChangeEvent<Boolean> event) {
         if (event.getValue()) {
             this.addSelection.setValue(false);
-            this.onlySelection.setValue(false);
         }
     }
 
@@ -236,16 +236,12 @@ public class CommitViewImpl extends Window implements CommitView {
     public void onAddSelectionValueChange(final ValueChangeEvent<Boolean> event) {
         if (event.getValue()) {
             this.addAll.setValue(false);
-            this.onlySelection.setValue(false);
         }
     }
 
-    @UiHandler("onlySelection")
+    @UiHandler("commitAllSelection")
     public void onOnlySelectionValueChange(final ValueChangeEvent<Boolean> event) {
-        if (event.getValue()) {
-            this.addAll.setValue(false);
-            this.addSelection.setValue(false);
-        }
+        this.commitAllSelection.setValue(event.getValue());
     }
 
     @UiHandler("amend")

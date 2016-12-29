@@ -37,7 +37,7 @@ public interface AddToIndexView extends View<AddToIndexView.ActionDelegate> {
      * @param message
      *         content of message
      */
-    void setMessage(@NotNull String message, @NotNull List<String> items);
+    void setMessage(@NotNull String message);
 
     /** @return <code>true</code> if new file must be added to index, and <code>false</code> otherwise */
     boolean isUpdated();

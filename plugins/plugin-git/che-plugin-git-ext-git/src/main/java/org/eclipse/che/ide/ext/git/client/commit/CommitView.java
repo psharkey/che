@@ -75,18 +75,18 @@ public interface CommitView extends View<CommitView.ActionDelegate> {
     void setIncludeSelection(boolean includeSelection);
 
     /**
-     * Tells the state of the field 'commit only selection'.
+     * Tells the state of the field 'commit all selection'.
      * 
      * @return true iff the field is checked
      */
-    boolean isOnlySelection();
+    boolean isCommitAllSelection();
 
     /**
-     * Sets the state of the field 'commit only selection'.
+     * Sets the state of the field 'commit all selection'.
      * 
      * @return true to check the field
      */
-    void setOnlySelection(boolean onlySelection);
+    void setCommitAllSelection(boolean onlySelection);
 
     /** @return <code>true</code> if need to amend the last commit, and <code>false</code> otherwise */
     boolean isAmend();
