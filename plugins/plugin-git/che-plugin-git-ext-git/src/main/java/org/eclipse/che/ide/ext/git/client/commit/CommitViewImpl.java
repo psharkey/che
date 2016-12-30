@@ -50,7 +50,7 @@ public class CommitViewImpl extends Window implements CommitView {
     @UiField
     CheckBox addAll;
     /**
-     * The 'include selection' in commit field.
+     * The 'add to index selected files selection' in commit field.
      */
     @UiField
     CheckBox addSelection;
@@ -143,14 +143,14 @@ public class CommitViewImpl extends Window implements CommitView {
 
     /** {@inheritDoc} */
     @Override
-    public boolean isAllFilesInclued() {
+    public boolean isAddAllExceptNew() {
         return this.addAll.getValue();
     }
 
     /** {@inheritDoc} */
     @Override
-    public void setAllFilesInclude(boolean isAllFiles) {
-        this.addAll.setValue(isAllFiles);
+    public void setAddAllExceptNew(boolean isAddAllExceptNew) {
+        this.addAll.setValue(isAddAllExceptNew);
     }
 
     /** {@inheritDoc} */
@@ -166,22 +166,22 @@ public class CommitViewImpl extends Window implements CommitView {
     }
 
     @Override
-    public boolean isIncludeSelection() {
+    public boolean isAddSelectedFiles() {
         return this.addSelection.getValue();
     }
 
     @Override
-    public void setIncludeSelection(final boolean includeSelection) {
+    public void setAddSelectedFiles(final boolean includeSelection) {
         this.addSelection.setValue(includeSelection);
     }
 
     @Override
-    public boolean isCommitAllSelection() {
+    public boolean isCommitAllFiles() {
         return this.commitAllSelection.getValue();
     }
 
     @Override
-    public void setCommitAllSelection(final boolean onlySelection) {
+    public void setCommitAllFiles(final boolean onlySelection) {
         this.commitAllSelection.setValue(onlySelection);
     }
 

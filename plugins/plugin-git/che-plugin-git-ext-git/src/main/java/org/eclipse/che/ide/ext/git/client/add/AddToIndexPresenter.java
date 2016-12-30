@@ -69,10 +69,11 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
 
     public void showDialog() {
         if (appContext.getResources().length == 1) {
-            if (appContext.getResource() instanceof Container) {
-                view.setMessage(constant.addToIndexFolder(appContext.getResource().getName()));
+            Resource resource = appContext.getResource();
+            if (resource instanceof Container) {
+                view.setMessage(constant.addToIndexFolder(resource.getName()));
             } else {
-                view.setMessage(constant.addToIndexFile(appContext.getResource().getName()));
+                view.setMessage(constant.addToIndexFile(resource.getName()));
             }
         } else {
             view.setMessage(constant.addToIndexMultiple());

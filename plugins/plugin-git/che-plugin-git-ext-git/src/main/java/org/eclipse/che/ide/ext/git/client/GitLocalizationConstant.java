@@ -356,7 +356,7 @@ public interface GitLocalizationConstant extends Messages {
     @Key("view.commit.selection_field_title")
     String commitSelectionFieldTitle();
 
-    @Key("view.commit.onlyselection_field_title")
+    @Key("view.commit.all_project_field_title")
     String commitAllFieldTitle();
 
     @Key("view.commit.amend_field_title")

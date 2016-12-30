@@ -66,7 +66,7 @@ public class CommitPresenterTest extends BaseTest {
         presenter.showDialog(project);
 
         verify(view).setAmend(eq(!IS_OVERWRITTEN));
-        verify(view).setAllFilesInclude(eq(!ALL_FILE_INCLUDES));
+        verify(view).setAddAllExceptNew(eq(!ALL_FILE_INCLUDES));
         verify(view).focusInMessageField();
         verify(view).setEnableCommitButton(eq(DISABLE_BUTTON));
         verify(view).getMessage();
@@ -79,7 +79,7 @@ public class CommitPresenterTest extends BaseTest {
         presenter.showDialog(project);
 
         verify(view).setAmend(eq(!IS_OVERWRITTEN));
-        verify(view).setAllFilesInclude(eq(!ALL_FILE_INCLUDES));
+        verify(view).setAddAllExceptNew(eq(!ALL_FILE_INCLUDES));
         verify(view).focusInMessageField();
         verify(view).setEnableCommitButton(eq(ENABLE_BUTTON));
         verify(view).getMessage();

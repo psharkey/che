@@ -51,7 +51,7 @@ import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
  */
 @Singleton
 public class CommitPresenter implements CommitView.ActionDelegate {
-    public static final String COMMIT_COMMAND_NAME = "Git commit";
+    private static final String COMMIT_COMMAND_NAME = "Git commit";
 
     private final DialogFactory           dialogFactory;
     private final AppContext              appContext;
@@ -90,10 +90,10 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     public void showDialog(Project project) {
         this.project = project;
 
+        view.setAddAllExceptNew(false);
+        view.setAddSelectedFiles(false);
+        view.setCommitAllFiles(false);
         view.setAmend(false);
-        view.setAllFilesInclude(false);
-        view.setIncludeSelection(false);
-        view.setCommitAllSelection(false);
         view.setEnableCommitButton(!view.getMessage().isEmpty());
         view.showDialog();
         view.focusInMessageField();
@@ -103,37 +103,35 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     @Override
     public void onCommitClicked() {
         final String message = view.getMessage();
-        final boolean all = view.isAllFilesInclued();
+        final boolean addAll = view.isAddAllExceptNew();
+        final boolean addSelected = view.isAddSelectedFiles();
+        final boolean commitAll = view.isCommitAllFiles();
         final boolean amend = view.isAmend();
-        final boolean selectionFlag = this.view.isIncludeSelection();
-        final boolean commitAllFlag = this.view.isCommitAllSelection();
 
-        if (selectionFlag) {
-            addAndCommitSelection(message, amend);
-        } else if (commitAllFlag) {
-            doCommit(message, all, amend);
+        if (addSelected) {
+            addSelectedAndCommit(message, commitAll, amend);
         } else {
-            commitSelection(message, amend);
+            doCommit(message, addAll, commitAll, amend);
         }
     }
 
-    protected void addAndCommitSelection(final String message, final boolean amend) {
+    private void addSelectedAndCommit(final String message, final boolean commitAll, final boolean amend) {
         final Resource[] resources = appContext.getResources();
 
         if (isNullOrEmpty(resources)) {
-            doCommit(message, false, amend);
+            doCommit(message, false, commitAll, amend);
         } else {
             service.add(appContext.getDevMachine(), project.getLocation(), false, toRelativePaths(resources))
                    .then(new Operation<Void>() {
                        @Override
                        public void apply(Void ignored) throws OperationException {
-                           commitSelection(message, amend);
+                           doCommit(message, false, commitAll, amend);
                        }
                    });
         }
     }
 
-    protected Path[] toRelativePaths(Resource[] resources) {
+    private Path[] toRelativePaths(Resource[] resources) {
         final Path[] paths = new Path[resources.length];
 
         for (int i = 0; i < resources.length; i++) {
@@ -147,23 +145,14 @@ public class CommitPresenter implements CommitView.ActionDelegate {
         return paths;
     }
 
-    protected void commitSelection(final String message, final boolean amend) {
+    private void doCommit(final String message, final boolean addAll, final boolean commitAll, final boolean amend) {
         final Resource[] resources = appContext.getResources();
-
-        checkState(!isNullOrEmpty(resources));
-
-        service.commit(appContext.getDevMachine(), project.getLocation(), message, toRelativePaths(resources), amend)
-               .then(new Operation<Revision>() {
-                   @Override
-                   public void apply(Revision revision) throws OperationException {
-                       onCommitSuccess(revision);
-                       view.close();
-                   }
-               });
-    }
-
-    protected void doCommit(final String message, final boolean all, final boolean amend) {
-        service.commit(appContext.getDevMachine(), project.getLocation(), message, all, amend)
+        service.commit(appContext.getDevMachine(),
+                       project.getLocation(),
+                       message,
+                       addAll,
+                       commitAll ? new Path[]{Path.valueOf(".")} : toRelativePaths(resources),
+                       amend)
                .then(new Operation<Revision>() {
                    @Override
                    public void apply(Revision revision) throws OperationException {
@@ -180,7 +169,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
                });
     }
 
-    protected void onCommitSuccess(@NotNull final Revision revision) {
+    private void onCommitSuccess(@NotNull final Revision revision) {
         String date = dateTimeFormatter.getFormattedDate(revision.getCommitTime());
         String message = constant.commitMessage(revision.getId(), date);
 
@@ -195,7 +184,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
         view.setMessage("");
     }
 
-    protected void handleError(@NotNull Throwable exception) {
+    private void handleError(@NotNull Throwable exception) {
         if (exception instanceof ServerException &&
             ((ServerException)exception).getErrorCode() == ErrorCodes.NO_COMMITTER_NAME_OR_EMAIL_DEFINED) {
             dialogFactory.createMessageDialog(constant.commitTitle(), constant.committerIdentityInfoEmpty(), null).show();
