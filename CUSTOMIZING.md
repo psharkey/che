@@ -2,42 +2,42 @@ Eclipse Che is a platform for creating distributed developer tooling. There are 
 
 #### Stacks
 A stack is the configuration of a runtime that can be used to power a workspace. Users choose the stack that powers a workspace within the user dashboard. Stacks have a recipe that defines how the container should be created and also meta data that defines the tags associated with the stack. 
-* [Add Your Stacks to Che](https://eclipse-che.readme.io/docs/stacks#custom-stacks-for-che)
-* [Stack Data Model](https://eclipse-che.readme.io/docs/stack)
-* [Che Included Stacks](https://eclipse-che.readme.io/docs/stacks#section-ready-to-go-stacks)
-* [Add Your Stack to Default Che Assembly](https://eclipse-che.readme.io/v4.0/docs/stacks#adding-stacks-to-the-che-default-assembly)
-* * TODO: Update this link to point to wiki page that can be updated by community
+* [Add Your Stacks to Che](https://www.eclipse.org/che/docs/workspace/stacks/index.html#custom-stack)
+* [Stack Data Model](https://www.eclipse.org/che/docs/workspace/data-model-stacks/index.html)
+* [Che Included Stacks](https://www.eclipse.org/che/docs/workspace/stacks/index.html#ready-to-go-stacks)
+* [Add Your Stack](https://www.eclipse.org/che/docs/workspace/stacks/index.html#create-a-stack)
 
 #### Recipes
 A recipe defines the runtime of a workspace environment.  Workspaces can have multiple environments, each with their own runtime.  Che supports different kinds of runtimes, but the default is Docker letting us make use of [Dockerfiles](https://docs.docker.com/engine/reference/builder/) as recipes. 
-* [Recipes](https://eclipse-che.readme.io/docs/recipes)
-* [Writing Custom Recipes](https://eclipse-che.readme.io/v4.3/docs/recipes#section-authoring-custom-recipes)
-* [Che Included Recipes](https://github.com/codenvy/dockerfiles)
+* [Recipes](https://www.eclipse.org/che/docs/workspace/recipes/index.html)
+* [Che Included Recipes](https://github.com/eclipse/che-dockerfiles/tree/master/recipes)
+* [Writing Single Container Recipes](https://www.eclipse.org/che/docs/workspace/recipes/index.html#single-container-recipes)
+* [Writing Multiple Container Recipes](https://www.eclipse.org/che/docs/workspace/recipes/index.html#multi-container-recipes)
 
-#### Templates
-A template is a packaged set of sample code that is launched in the workspace when a user creates a new project. Users can select from a template while using the user dashboard. Templates have both sample code and a default set of commands associated with them. Templates are loaded based upon the type of stack selected. You can add your own templates to the default Che distribution.
-* [Templates](https://eclipse-che.readme.io/docs/templates)
-* [Add Templates](https://eclipse-che.readme.io/docs/templates#register-new-project-templates)
-* [Template Data Model](https://eclipse-che.readme.io/docs/template)
-* [Add Your Template to Default Che Assembly](https://eclipse-che.readme.io/docs/templates#section-add-your-template-to-default-che-assembly)
+#### Sample Projects
+A sample project is a packaged set of sample code that is launched in the workspace when a user creates a new project. Users can select from a sample project while using the user dashboard. Sample project have both sample code and a default set of commands associated with them and are loaded based upon the type of stack selected. You can add your own project to the default Che distribution.
+* [Samples](https://www.eclipse.org/che/docs/workspace/samples/index.html)
+* [Add Sample Project](https://www.eclipse.org/che/docs/workspace/samples/index.html#register-new-project-templates)
+* [Template Data Model](https://www.eclipse.org/che/docs/workspace/data-model-samples/index.html)
+* [Add Your Template to Default Che Assembly](https://www.eclipse.org/che/docs/workspace/samples/index.html#add-your-template-to-default-che-assembly)
 
 #### Commands
 A command is a process that is injected into your workspace. It's outputs are streamed into the console. Commands have type and you can create, save, update and delete commands from within the IDE. You can create templates that have sample projects with default commands that are pre-populated in the IDE. Commands can reference macros that intelligently navigate the project tree or current selections.
-* [Commands](https://eclipse-che.readme.io/docs/commands)
-* [Macros](https://eclipse-che.readme.io/docs/commands#macros)
+* [Commands](https://www.eclipse.org/che/docs/ide/commands/index.html)
+* [Macros](https://www.eclipse.org/che/docs/ide/commands/index.html#macros)
 * [Command Data Model](https://eclipse-che.readme.io/docs/command)
 
-#### Extension Development
-An extension is a set of code and resources that are packaged into a plugin that alter the behavior of the system. Extensions can be IDE extensions, workspace extensions (they are injected into the workspace agent running within each workspace), or Che extensions (injected into the Che server). Extensions are authored in Java and maven, and then packaged into JAR / ZIP files for deployment into Eclipse Che.
-* [Extension Intro](https://dash.readme.io/project/eclipse-che/docs/introduction-1)
-* [Developing Extensions](https://eclipse-che.readme.io/docs/create-and-build-extensions)
+#### Plugins Development
+An plugins is a set of code and resources that are packaged into a plugin that alter the behavior of the system. Plugins can be IDE extensions, workspace extensions (they are injected into the workspace agent running within each workspace), or Che extensions (injected into the Che server). Plugins are authored in Java and maven, and then packaged into JAR / ZIP files for deployment into Eclipse Che.
+* [Extension Intro](https://www.eclipse.org/che/docs/plugins/introduction/index.html)
+* [Developing Plugins](https://eclipse-che.readme.io/docs/create-and-build-extensions)
 * [JSON Extension Tutorial](https://eclipse-che.readme.io/docs/introduction-1#section-the-json-example)
-* [Authoring Extensions in Che](https://eclipse-che.readme.io/docs/setup-che-workspace#author-extension-using-the-che-ide)
-* [Authoring Extensions in Eclipse](https://eclipse-che.readme.io/docs/setup-che-workspace#author-extension-using-the-eclipse-ide)
-* [Authoring Extensions in IntelliJ](https://eclipse-che.readme.io/docs/setup-che-workspace#author-extensions-using-intellij-ide)
+* [Authoring Plugins in Che](https://eclipse-che.readme.io/docs/setup-che-workspace#author-extension-using-the-che-ide)
+* [Authoring Plugins in Eclipse](https://eclipse-che.readme.io/docs/setup-che-workspace#author-extension-using-the-eclipse-ide)
+* [Authoring Plugins in IntelliJ](https://eclipse-che.readme.io/docs/setup-che-workspace#author-extensions-using-intellij-ide)
 * [Dependency Injection](https://eclipse-che.readme.io/docs/dependency-injection-basics)
-* [Extensions Packaged With Che](https://github.com/eclipse/che/tree/master/plugins)
-* [Extension SDK JavaDoc](https://eclipse-che.readme.io/docs/java-class-reference)
+* [Plugins Packaged With Che](https://github.com/eclipse/che/tree/master/plugins)
+* [Plugins SDK JavaDoc](https://eclipse-che.readme.io/docs/java-class-reference)
 
 #### IDE Extensions
 IDE extensions are compiled into JavaScript with other extensions to create a single, JavaScript application. You can package many extensions together into a single JavaScript application. The JavaScript application is cross-browser optimized. You can debug extensions and perform execution traces from within the browser of extension code. IDE extensions can invoke REST services that are running within the Che server or within a workspace. Che provides default workspace REST APIs or you can provide your own with workspace extensions.
