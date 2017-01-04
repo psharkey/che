@@ -233,11 +233,13 @@ export class CheWorkspace {
     let promise = this.remoteWorkspaceAPI.getDetails({workspaceKey: workspaceKey}).$promise;
     promise.then((data: che.IWorkspace) => {
       this.workspacesById.set(data.id, data);
-      this.lodash.remove(this.workspaces, (workspace: che.IWorkspace) => {
-        return workspace.id === data.id;
-      });
-      this.workspaces.push(data);
-      this.startUpdateWorkspaceStatus(data.id);
+      if (!data.temporary) {
+        this.lodash.remove(this.workspaces, (workspace: che.IWorkspace) => {
+          return workspace.id === data.id;
+        });
+        this.workspaces.push(data);
+        this.startUpdateWorkspaceStatus(data.id);
+      }
       defer.resolve();
     }, (error: any) => {
       if (error.status !== 304) {
@@ -536,7 +538,7 @@ export class CheWorkspace {
    * Add subscribe to websocket channel for specified workspaceId
    * to handle workspace's status changes.
    * @param workspaceId {string}
-     */
+   */
   startUpdateWorkspaceStatus(workspaceId: string): void {
     if (this.subscribedWorkspacesIds.indexOf(workspaceId) < 0) {
       let bus = this.cheWebsocket.getBus();

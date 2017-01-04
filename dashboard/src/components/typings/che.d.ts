@@ -59,11 +59,14 @@ declare namespace _che {
     scope: string;
     components: Array<any>;
     source: any;
-    workspaceConfig: IWorkspace;
+    workspaceConfig: IWorkspaceConfig;
   }
 
   export interface IWorkspace {
     id?: string;
+    name: string;
+    projects?: any;
+    links?: Array<any>;
     runtime?: any;
     temporary?: boolean;
     status?: string;
@@ -71,7 +74,7 @@ declare namespace _che {
     attributes?: {
       updated?: number;
       created?: number;
-      [propName: string]: string;
+      [propName: string]: string | number;
     };
     config: IWorkspaceConfig;
   }
@@ -85,7 +88,7 @@ declare namespace _che {
   }
 
   export interface IWorkspaceEnvironments {
-      [envName: string]: any;
+    [envName: string]: any;
   }
 
   export interface IProject {
@@ -112,17 +115,17 @@ declare namespace _che {
 
   export interface IImportProject {
     source: {
-      type: string;
+      type?: string;
       location: string;
       parameters: Object;
     };
     project: {
       name: string;
-      type: string;
+      type?: string;
       description: string;
-      commands: Array<any>;
-      attributes: Array<any>;
-      options: Array<any>;
+      commands?: Array<any>;
+      attributes?: Array<any>;
+      options?: Array<any>;
     };
   }
 
