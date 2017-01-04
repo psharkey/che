@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.commit;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -40,7 +41,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.util.Arrays.isNullOrEmpty;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 /**
@@ -48,6 +48,7 @@ import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
  *
  * @author Ann Zhuleva
  * @author Vlad Zhukovskyi
+ * @author Igor Vinokur
  */
 @Singleton
 public class CommitPresenter implements CommitView.ActionDelegate {
@@ -116,19 +117,13 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     }
 
     private void addSelectedAndCommit(final String message, final boolean commitAll, final boolean amend) {
-        final Resource[] resources = appContext.getResources();
-
-        if (isNullOrEmpty(resources)) {
-            doCommit(message, false, commitAll, amend);
-        } else {
-            service.add(appContext.getDevMachine(), project.getLocation(), false, toRelativePaths(resources))
-                   .then(new Operation<Void>() {
-                       @Override
-                       public void apply(Void ignored) throws OperationException {
-                           doCommit(message, false, commitAll, amend);
-                       }
-                   });
-        }
+        service.add(appContext.getDevMachine(), project.getLocation(), false, toRelativePaths(appContext.getResources()))
+               .then(new Operation<Void>() {
+                   @Override
+                   public void apply(Void ignored) throws OperationException {
+                       doCommit(message, false, commitAll, amend);
+                   }
+               });
     }
 
     private Path[] toRelativePaths(Resource[] resources) {
@@ -145,7 +140,8 @@ public class CommitPresenter implements CommitView.ActionDelegate {
         return paths;
     }
 
-    private void doCommit(final String message, final boolean addAll, final boolean commitAll, final boolean amend) {
+    @VisibleForTesting
+    void doCommit(final String message, final boolean addAll, final boolean commitAll, final boolean amend) {
         final Resource[] resources = appContext.getResources();
         service.commit(appContext.getDevMachine(),
                        project.getLocation(),

@@ -72,12 +72,15 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
     }
 
     public void showDialog(Project project) {
+        Resource[] resources = appContext.getResources();
         this.project = project;
-        if (appContext.getResources().length == 1) {
-            if (appContext.getResource() instanceof Container) {
-                view.setMessage(constant.removeFromIndexFolder(appContext.getResource().getName()));
+        if (resources.length == 1) {
+            Resource resource = appContext.getResource();
+            String selectedItemName = resource.getName();
+            if (resource instanceof Container) {
+                view.setMessage(constant.removeFromIndexFolder(selectedItemName));
             } else {
-                view.setMessage(constant.removeFromIndexFile(appContext.getResource().getName()));
+                view.setMessage(constant.removeFromIndexFile(selectedItemName));
             }
         } else {
             view.setMessage(constant.removeFromIndexAll());

@@ -18,6 +18,7 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.git.GitServiceClient;
+import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -27,7 +28,6 @@ import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 
-import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
@@ -36,6 +36,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  *
  * @author Ann Zhuleva
  * @author Vlad Zhukovskyi
+ * @author Igor Vinokur
  */
 @Singleton
 public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
@@ -76,7 +77,7 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
                 view.setMessage(constant.addToIndexFile(resource.getName()));
             }
         } else {
-            view.setMessage(constant.addToIndexMultiple());
+            view.setMessage(constant.addToIndexMultiSelect());
         }
         view.setUpdated(false);
         view.showDialog();
@@ -85,19 +86,21 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
     /** {@inheritDoc} */
     @Override
     public void onAddClicked() {
-        final GitOutputConsole console = gitOutputConsoleFactory.create(ADD_TO_INDEX_COMMAND_NAME);
+        DevMachine devMachine = appContext.getDevMachine();
         Resource[] resources = appContext.getResources();
+        Path projectLocation = appContext.getRootProject().getLocation();
         Path[] paths = new Path[resources.length];
         for (int i = 0; i < resources.length; i++) {
-            Path path = resources[i].getLocation().removeFirstSegments(appContext.getRootProject().getLocation().segmentCount());
+            Path path = resources[i].getLocation().removeFirstSegments(projectLocation.segmentCount());
             paths[i] = path.segmentCount() == 0 ? Path.EMPTY : path;
         }
-        service.add(appContext.getDevMachine(), appContext.getRootProject().getLocation(), view.isUpdated(), paths)
+        final GitOutputConsole console = gitOutputConsoleFactory.create(ADD_TO_INDEX_COMMAND_NAME);
+        consolesPanelPresenter.addCommandOutput(devMachine.getId(), console);
+        service.add(devMachine, projectLocation, view.isUpdated(), paths)
                .then(new Operation<Void>() {
                    @Override
                    public void apply(Void arg) throws OperationException {
                        console.print(constant.addSuccess());
-                       consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                        notificationManager.notify(constant.addSuccess());
                        view.close();
                    }
@@ -105,9 +108,7 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
                .catchError(new Operation<PromiseError>() {
                    @Override
                    public void apply(PromiseError arg) throws OperationException {
-                       String errorMessage = constant.addFailed();
-                       console.printError(errorMessage);
-                       consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                       console.printError(constant.addFailed());
                        notificationManager.notify(constant.addFailed(), FAIL, FLOAT_MODE);
                        view.close();
                    }

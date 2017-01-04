@@ -36,7 +36,7 @@ import static org.mockito.Mockito.when;
  *
  * @author Andrey Plotnikov
  * @author Vlad Zhukovskyi
- * @
+ * @author Igor Vinokur
  */
 public class AddToIndexPresenterTest extends BaseTest {
     private static final String MESSAGE     = "message";
@@ -114,11 +114,11 @@ public class AddToIndexPresenterTest extends BaseTest {
 
         when(appContext.getResource()).thenReturn(file2);
         when(appContext.getResources()).thenReturn(new Resource[]{file1, file2});
-        when(constant.addToIndexMultiple()).thenReturn(MESSAGE);
+        when(constant.addToIndexMultiSelect()).thenReturn(MESSAGE);
 
         presenter.showDialog();
 
-        verify(constant).addToIndexMultiple();
+        verify(constant).addToIndexMultiSelect();
         verify(view).setMessage(eq(MESSAGE));
         verify(view).setUpdated(eq(false));
         verify(view).showDialog();
@@ -126,27 +126,27 @@ public class AddToIndexPresenterTest extends BaseTest {
 
     @Test
     public void shouldAddToIndexWhenAddButtonClicked() throws Exception {
-        when(constant.addSuccess()).thenReturn("success");
+        when(constant.addSuccess()).thenReturn(MESSAGE);
 
 
         presenter.onAddClicked();
         verify(voidPromise).then(voidPromiseCaptor.capture());
         voidPromiseCaptor.getValue().apply(null);
 
-        verify(console).print(eq("success"));
-        verify(notificationManager).notify("success");
+        verify(console).print(eq(MESSAGE));
+        verify(notificationManager).notify(MESSAGE);
     }
 
     @Test
     public void shouldPrintErrorWhenFailedAddToIndex() throws Exception {
-        when(constant.addFailed()).thenReturn("failed");
+        when(constant.addFailed()).thenReturn(MESSAGE);
 
         presenter.onAddClicked();
         verify(voidPromise).catchError(promiseErrorCaptor.capture());
         promiseErrorCaptor.getValue().apply(null);
 
-        verify(console).printError(eq("failed"));
-        verify(notificationManager).notify(eq("failed"), eq(FAIL), eq(FLOAT_MODE));
+        verify(console).printError(eq(MESSAGE));
+        verify(notificationManager).notify(eq(MESSAGE), eq(FAIL), eq(FLOAT_MODE));
     }
 
     @Test

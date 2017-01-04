@@ -14,6 +14,8 @@ import org.eclipse.che.api.git.shared.IndexFile;
 import org.eclipse.che.api.git.shared.ResetRequest;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
 import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.eclipse.che.ide.resource.Path;
@@ -21,8 +23,10 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
@@ -70,6 +74,7 @@ public class ResetFilesPresenterTest extends BaseTest {
         when(service.getStatus(anyObject(), any(Path.class))).thenReturn(statusPromise);
         when(statusPromise.then(any(Operation.class))).thenReturn(statusPromise);
         when(statusPromise.catchError(any(Operation.class))).thenReturn(statusPromise);
+        when(appContext.getResources()).thenReturn(new Resource[]{});
     }
 
     @Test
@@ -208,6 +213,28 @@ public class ResetFilesPresenterTest extends BaseTest {
         verify(console).printError(anyString());
         verify(notificationManager).notify(anyString());
     }
+
+    @Test
+    public void shouldSetIndexedSelectedFiles() throws Exception {
+        Status status = mock(Status.class);
+        when(status.getAdded()).thenReturn(singletonList("path/addedFile"));
+        when(status.getChanged()).thenReturn(singletonList("path/changedFile"));
+        when(status.getRemoved()).thenReturn(singletonList("path/removedFile"));
+        IndexFile indexFile = mock(IndexFile.class);
+        when(indexFile.getPath()).thenReturn("path/file");
+        when(dtoFactory.createDto(IndexFile.class).withPath(eq("path/file")).withIndexed(true)).thenReturn(indexFile);
+        Resource resource = mock(Resource.class);
+        when(resource.getLocation()).thenReturn(Path.valueOf("project/path/file"));
+        when(project.getLocation()).thenReturn(Path.valueOf("project"));
+        when(appContext.getResources()).thenReturn(new Resource[]{resource});
+        when(appContext.getRootProject()).thenReturn(project);
+
+        presenter.showDialog(project);
+
+        verify(statusPromise).then(statusPromiseCaptor.capture());
+        statusPromiseCaptor.getValue().apply(status);
+    }
+
 
     @Test
     public void testOnCancelClicked() throws Exception {

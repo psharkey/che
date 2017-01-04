@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.ext.git.client;
 
 import com.google.gwt.i18n.client.Messages;
-import com.google.gwt.safehtml.shared.SafeHtml;
 
 /** @author Evgen Vidolob */
 public interface GitLocalizationConstant extends Messages {
@@ -297,8 +296,8 @@ public interface GitLocalizationConstant extends Messages {
     @Key("view.add_to_index.all_changes")
     String addToIndexAllChanges();
 
-    @Key("view.add_to_index.multiple")
-    String addToIndexMultiple();
+    @Key("view.add_to_index.multiselect")
+    String addToIndexMultiSelect();
 
     @Key("view.add_to_index.folder")
     String addToIndexFolder(String folder);
